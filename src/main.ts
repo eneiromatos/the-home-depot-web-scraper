@@ -1,33 +1,59 @@
 import { Actor } from "apify";
-import { PuppeteerCrawler, log } from "@crawlee/puppeteer";
+import { PuppeteerCrawler, log, RequestQueue } from "@crawlee/puppeteer";
 import { router } from "./routes.js";
-import { labels } from "./labels.js";
-
+import { getRequest } from "./router.js";
 await Actor.init();
 
 interface InputSchema {
-  startUrls: string[];
-  debug?: boolean;
+  categoryUrls: Array<string>;
+  keywords: Array<string>;
+  productUrls: Array<string>;
+  startPage: number;
+  lastPage: number;
+  allPages: boolean;
+  minPrice: number;
+  maxPrice: number;
 }
 
-const { startUrls = ["https://apify.com"], debug } =
-  (await Actor.getInput<InputSchema>()) ?? {};
-
-if (debug) {
-  log.setLevel(log.LEVELS.DEBUG);
-}
+const {
+  categoryUrls = [],
+  keywords = [],
+  productUrls = [],
+  startPage = 1,
+  lastPage = 1,
+  allPages = false,
+  minPrice = 0,
+  maxPrice = 0,
+} = (await Actor.getInput<InputSchema>()) ?? {};
 
 const proxyConfiguration = await Actor.createProxyConfiguration();
+const requestQueue = await RequestQueue.open();
+
+export { allPages, lastPage, startPage };
+
+// Add the category requests to the request queue.
+for (const url of categoryUrls) {
+  await requestQueue.addRequest(getRequest(url, minPrice, maxPrice));
+}
+
+// Add the product requests to the request queue.
+for (const url of productUrls) {
+  await requestQueue.addRequest(getRequest(url, minPrice, maxPrice));
+}
+
+// Add the keyword requests to the request queue.
+for (let keyword of keywords) {
+  const url = `https://www.homedepot.com/s/${keyword}`;
+  await requestQueue.addRequest(getRequest(url, minPrice, maxPrice));
+}
 
 const crawler = new PuppeteerCrawler({
   proxyConfiguration,
-  // Be nice to the websites.
-  // Remove to unleash full power.
-  maxConcurrency: 50,
+  requestQueue,
+  maxConcurrency: 20,
+  maxRequestRetries: 10,
   requestHandler: router,
 });
-
-await crawler.addRequests(startUrls);
 
 log.info("Starting the crawl.");
 await crawler.run();
