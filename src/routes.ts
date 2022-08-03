@@ -131,5 +131,29 @@ router.addHandler(labels.listing, async ({ request, page, log }) => {
 
 router.addHandler(labels.detail, async ({ request, page, log }) => {
   log.info("Handling:", { label: request.label, url: request.url });
-  await Dataset.pushData({ url: request.url });
+
+  async function getTitle() {
+    const title = await page.$eval("span.product-title h1", (el) =>
+      el.textContent.trim()
+    );
+    return title;
+  }
+
+  async function getBrand() {
+    const brand = await page.$eval("span.product-details__brand--link", (el) =>
+      el.textContent.trim()
+    );
+    return brand;
+  }
+
+  /**************************************************************************************/
+  const url = request.url;
+  const title = await getTitle();
+  const brand = await getBrand();
+
+  await Dataset.pushData({
+    url,
+    title,
+    brand,
+  });
 });
