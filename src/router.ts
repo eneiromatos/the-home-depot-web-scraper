@@ -10,13 +10,13 @@ export function getRequest(url: string, minPrice?: number, maxPrice?: number) {
     newURL.searchParams.set("lowerbound", minPrice.toString());
   }
 
-  if (url.includes("/b/" || url.includes("/s/"))) {
+  if (url.includes("/b/") || url.includes("/s/")) {
     // Case of category URL or Keyword URL
     finalRequest = { url: newURL.toString(), label: labels.listing };
-  } else if (url.includes("/b/")) {
+  } else if (url.includes("/p/")) {
     // Case of product URL
     finalRequest = { url: newURL.toString(), label: labels.detail };
   }
-  
+
   return finalRequest;
 }
