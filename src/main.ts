@@ -52,7 +52,7 @@ for (let keyword of keywords) {
   await requestQueue.addRequest(getRequest(url, minPrice, maxPrice));
 }
 
-const config = new Configuration({ headless: false });
+const config = new Configuration({ headless: true });
 
 const crawler = new PuppeteerCrawler(
   {
