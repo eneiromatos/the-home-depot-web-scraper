@@ -5,7 +5,9 @@
         "target": "ES2022",
         "outDir": "dist",
         "noUnusedLocals": false,
-        "lib": ["DOM"]
+        "lib": ["DOM"],
+        "strictNullChecks": false,
+        "noImplicitAny": false
     },
     "include": [
         "./src/**/*"
