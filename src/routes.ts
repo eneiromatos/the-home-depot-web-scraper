@@ -1,4 +1,8 @@
-import { createPuppeteerRouter, RequestQueue } from "@crawlee/puppeteer";
+import {
+  createPuppeteerRouter,
+  RequestQueue,
+  Dataset,
+} from "@crawlee/puppeteer";
 import { labels } from "./labels.js";
 import { allPages, startPage, lastPage } from "./main.js";
 import { getRequest } from "./requestGenerator.js";
@@ -8,14 +12,18 @@ export const router = createPuppeteerRouter();
 const BaseURL = "https://www.homedepot.com/";
 
 router.addHandler(labels.listing, async ({ request, page, log }) => {
+  log.info("Handling:", { label: request.label, url: request.url });
   const requestQueue = await RequestQueue.open();
 
   async function reziseVieport() {
     const bodyWidth = 1440;
-    const bodyHeight = 40000;
+    const bodyHeight = 50000;
     await page.setViewport({ width: bodyWidth, height: bodyHeight });
+    for (let index = 0; index <= 10; index++) {
+      await page.keyboard.press("PageDown");
+    }
     await page.keyboard.press("End");
-    await page.waitForSelector("#footerTagline", { visible: true });
+    await page.waitForSelector("#footerTagline", { visible: false });
   }
 
   async function getPaginationData() {
@@ -81,7 +89,7 @@ router.addHandler(labels.listing, async ({ request, page, log }) => {
 
   async function navigateAllPaginationUrls() {
     const paginationUrls = await getPagination();
-    for (const url in paginationUrls) {
+    for (const url of paginationUrls) {
       const request = getRequest(url);
       await requestQueue.addRequest(request);
     }
@@ -122,6 +130,6 @@ router.addHandler(labels.listing, async ({ request, page, log }) => {
 });
 
 router.addHandler(labels.detail, async ({ request, page, log }) => {
-  const title = await page.title();
-  log.info(`Handle details: ${title} [${request.loadedUrl}]`);
+  log.info("Handling:", { label: request.label, url: request.url });
+  await Dataset.pushData({ url: request.url });
 });
