@@ -1,7 +1,12 @@
 import { Actor } from "apify";
-import { PuppeteerCrawler, log, RequestQueue } from "@crawlee/puppeteer";
+import {
+  PuppeteerCrawler,
+  log,
+  RequestQueue,
+  Configuration,
+} from "@crawlee/puppeteer";
 import { router } from "./routes.js";
-import { getRequest } from "./router.js";
+import { getRequest } from "./requestGenerator.js";
 await Actor.init();
 
 interface InputSchema {
@@ -47,13 +52,18 @@ for (let keyword of keywords) {
   await requestQueue.addRequest(getRequest(url, minPrice, maxPrice));
 }
 
-const crawler = new PuppeteerCrawler({
-  proxyConfiguration,
-  requestQueue,
-  maxConcurrency: 20,
-  maxRequestRetries: 10,
-  requestHandler: router,
-});
+const config = new Configuration({ headless: false });
+
+const crawler = new PuppeteerCrawler(
+  {
+    proxyConfiguration,
+    requestQueue,
+    maxConcurrency: 20,
+    maxRequestRetries: 10,
+    requestHandler: router,
+  },
+  config
+);
 
 log.info("Starting the crawl.");
 await crawler.run();
