@@ -10,7 +10,7 @@
       "description": "One or more category url(s) to extract products from.",
       "sectionCaption": "Input Options",
       "sectionDescription": "Sets the input options for scraping products.",
-      "editor": "requestListSources"
+      "editor": "stringList"
     },
     "keywords": {
       "title": "Keywords",
@@ -22,7 +22,7 @@
       "title": "Product URLs",
       "type": "array",
       "description": "One or more product urls to extract information from.",
-      "editor": "requestListSources"
+      "editor": "stringList"
     },
     "startPage": {
       "title": "Start Page",
