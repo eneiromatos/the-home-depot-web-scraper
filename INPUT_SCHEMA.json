@@ -56,19 +56,20 @@
       "description": "Minimun price of the scraped products.",
       "sectionCaption": "Segmentation",
       "sectionDescription": "Set options for segmentation of the products.",
-      "default": 1,
+      "default": 0,
       "editor": "number",
-      "minimum": 1,
-      "prefill": 1
+      "minimum": 0,
+      "prefill": 0
     },
     "maxPrice": {
       "title": "Maximun Price",
       "type": "integer",
       "description": "Maximun price of the scraped products.",
-      "default": 999999999,
+      "default": 0,
       "editor": "number",
-      "minimum": 2,
-      "prefill": 999999999
+      "minimum": 0,
+      "maximum": 99999,
+      "prefill": 0
     }
   },
   "required": []
