@@ -185,12 +185,35 @@ router.addHandler(labels.detail, async ({ request, page, log }) => {
     return description;
   }
 
+  async function getImages() {
+    const mainImageSelector = "div.mediagallery__mainimage";
+    const thumbsSelector = "div.overlay__thumbnails img";
+    try {
+      await page.waitForSelector(mainImageSelector);
+    } catch (error) {
+      return [];
+    }
+    await page.click(mainImageSelector);
+    try {
+      await page.waitForSelector(thumbsSelector);
+    } catch (error) {
+      return [];
+    }
+    const imageRelUrls = await page.$$eval(thumbsSelector, (images) =>
+      images.map((image) => image.getAttribute("src").replace("_145", "_1000"))
+    );
+    const imageUrls = imageRelUrls.map((image) =>
+      new URL(image, BaseURL).toString()
+    );
+    return imageUrls;
+  }
   /**************************************************************************************/
   const url = request.url;
   const title = await getTitle();
   const brand = await getBrand();
   const codes = await getCodes();
   const description = await getDescription();
+  const images = await getImages();
 
   await Dataset.pushData({
     url,
@@ -198,5 +221,6 @@ router.addHandler(labels.detail, async ({ request, page, log }) => {
     brand,
     codes,
     description,
+    images,
   });
 });
