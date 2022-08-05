@@ -171,9 +171,18 @@ router.addHandler(labels.detail, async ({ request, page, log }) => {
     return codes;
   }
 
-  async function getSpecifications() {
-    const selector = "#specifications table";
-    await page.waitForSelector(selector);
+  async function getDescription() {
+    const selector =
+      'div[class="grid desktop-content-wrapper__main-description"]';
+    try {
+      await page.waitForSelector(selector);
+    } catch (error) {
+      return "";
+    }
+    const description = await page.$eval(selector, (table) =>
+      table.innerHTML.trim()
+    );
+    return description;
   }
 
   /**************************************************************************************/
@@ -181,11 +190,13 @@ router.addHandler(labels.detail, async ({ request, page, log }) => {
   const title = await getTitle();
   const brand = await getBrand();
   const codes = await getCodes();
+  const description = await getDescription();
 
   await Dataset.pushData({
     url,
     title,
     brand,
     codes,
+    description,
   });
 });
