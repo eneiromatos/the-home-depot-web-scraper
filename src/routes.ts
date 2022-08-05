@@ -19,11 +19,16 @@ router.addHandler(labels.listing, async ({ request, page, log }) => {
     const bodyWidth = 1440;
     const bodyHeight = 50000;
     await page.setViewport({ width: bodyWidth, height: bodyHeight });
-    for (let index = 0; index <= 10; index++) {
+    for (let index = 1; index <= 6; index++) {
+      const selector = "section[id*=browse-search-pods-${num}]";
       await page.keyboard.press("PageDown");
+      await page.keyboard.press("PageDown");
+      try {
+        await page.waitForSelector(selector, { visible: true });
+      } catch (error) {
+        break;
+      }
     }
-    await page.keyboard.press("End");
-    await page.waitForSelector("#footerTagline", { visible: false });
   }
 
   async function getPaginationData() {
@@ -133,27 +138,54 @@ router.addHandler(labels.detail, async ({ request, page, log }) => {
   log.info("Handling:", { label: request.label, url: request.url });
 
   async function getTitle() {
-    const title = await page.$eval("span.product-title h1", (el) =>
-      el.textContent.trim()
-    );
+    const selector = "span.product-title h1";
+    await page.waitForSelector(selector, { visible: true });
+    const title = await page.$eval(selector, (el) => el.textContent.trim());
     return title;
   }
 
   async function getBrand() {
-    const brand = await page.$eval("span.product-details__brand--link", (el) =>
-      el.textContent.trim()
-    );
+    const selector = "span.product-details__brand--link";
+    try {
+      await page.waitForSelector(selector, { visible: true });
+    } catch (error) {
+      return "";
+    }
+    const brand = await page.$eval(selector, (el) => el.textContent.trim());
     return brand;
+  }
+
+  async function getCodes() {
+    const codes = page.$$eval(
+      "h2[class*='product-info-bar__detail']",
+      (codes) =>
+        codes.map((code) => {
+          const codeObj: Object = {};
+          const codeStr = code.textContent;
+          const codeName = codeStr.split("#")[0].trim();
+          const codeNum = codeStr.split("#")[1].trim();
+          codeObj[codeName] = codeNum;
+          return codeObj;
+        })
+    );
+    return codes;
+  }
+
+  async function getSpecifications() {
+    const selector = "#specifications table";
+    await page.waitForSelector(selector);
   }
 
   /**************************************************************************************/
   const url = request.url;
   const title = await getTitle();
   const brand = await getBrand();
+  const codes = await getCodes();
 
   await Dataset.pushData({
     url,
     title,
     brand,
+    codes,
   });
 });
