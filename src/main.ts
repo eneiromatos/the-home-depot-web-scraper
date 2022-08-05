@@ -59,7 +59,7 @@ const crawler = new PuppeteerCrawler(
     proxyConfiguration,
     requestQueue,
     maxConcurrency: 20,
-    maxRequestRetries: 10,
+    maxRequestRetries: 5,
     requestHandler: router,
   },
   config
