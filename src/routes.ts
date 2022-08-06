@@ -3,7 +3,7 @@ import {
   RequestQueue,
   Dataset,
 } from "@crawlee/puppeteer";
-import { product } from "./main.js";
+import { productData } from "./main.js";
 import { labels } from "./labels.js";
 import { allPages, startPage, lastPage } from "./main.js";
 import { getRequest } from "./requestGenerator.js";
@@ -137,19 +137,18 @@ router.addHandler(labels.listing, async ({ request, page, log }) => {
 
 router.addHandler(labels.detail, async ({ request, page, log }) => {
   log.info("Handling:", { label: request.label, url: request.url });
-  const productData = await product;
 
-  async function getTitle() {
+  function getTitle() {
     const title = productData.data.identifiers.productLabel;
     return title;
   }
 
-  async function getBrand() {
+  function getBrand() {
     const brand = productData.data.identifiers.brandName;
     return brand;
   }
 
-  async function getCodes() {
+  function getCodes() {
     const id = productData.data.identifiers.itemId;
     const sku = productData.data.identifiers.storeSkuNumber;
     const modelNumber = productData.data.identifiers.modelNumber;
@@ -163,7 +162,7 @@ router.addHandler(labels.detail, async ({ request, page, log }) => {
     return codes;
   }
 
-  async function getDescription() {
+  function getDescription() {
     const abstract = productData.data.details.description;
     const bulletPoints = productData.data.details.descriptiveAttributes
       .filter((el) => !el.value.includes("href"))
@@ -178,10 +177,10 @@ router.addHandler(labels.detail, async ({ request, page, log }) => {
         descriptionHTML = descriptionHTML.concat("</ul>");
       }
     }
-    return { abstract, bulletPoints, descriptionHTML };
+    return { descriptionHTML, abstract, bulletPoints };
   }
 
-  async function getImages() {
+  function getImages() {
     const images = productData.data.media.images.map((el) => {
       const maxRes = el.sizes.at(-1);
       const imgURL = el.url.replace("<SIZE>", maxRes);
@@ -189,13 +188,52 @@ router.addHandler(labels.detail, async ({ request, page, log }) => {
     });
     return images;
   }
+
+  function getPricing() {
+    let princig = {
+      currencySymbol: "$",
+      currentPrice: 0,
+      currentPriceUnit: "",
+      promoData: { originalPrice: 0, dates: { start: "", end: "" } },
+      alternatePriceData: { alternatePrice: 0, alternatePriceUnit: "" },
+    };
+
+    princig.currentPrice = productData.data.pricing.value;
+    princig.currentPriceUnit = productData.data.pricing.unitOfMeasure;
+
+    if (productData.data.pricing.promotion) {
+      princig.promoData.originalPrice = productData.data.pricing.value;
+      princig.promoData.dates.start =
+        productData.data.pricing.promotion.dates.start;
+      princig.promoData.dates.end =
+        productData.data.pricing.promotion.dates.end;
+    } else {
+      princig.promoData.originalPrice = null;
+      princig.promoData.dates.start = null;
+      princig.promoData.dates.end = null;
+    }
+
+    if (productData.data.pricing.alternate.unit.value) {
+      princig.alternatePriceData.alternatePrice =
+        productData.data.pricing.alternate.unit.value;
+      princig.alternatePriceData.alternatePriceUnit =
+        productData.data.pricing.alternate.unit.caseUnitOfMeasure;
+    } else {
+      princig.alternatePriceData.alternatePrice = null;
+      princig.alternatePriceData.alternatePriceUnit = null;
+    }
+
+    return princig;
+  }
+
   /**************************************************************************************/
   const url = request.url;
-  const title = await getTitle();
-  const brand = await getBrand();
-  const codes = await getCodes();
-  const description = await getDescription();
-  const images = await getImages();
+  const title = getTitle();
+  const brand = getBrand();
+  const codes = getCodes();
+  const description = getDescription();
+  const images = getImages();
+  const pricing = getPricing();
 
   await Dataset.pushData({
     url,
@@ -204,6 +242,6 @@ router.addHandler(labels.detail, async ({ request, page, log }) => {
     codes,
     description,
     images,
-    product,
+    pricing,
   });
 });
