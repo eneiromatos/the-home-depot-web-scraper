@@ -35,7 +35,7 @@ const proxyConfiguration = await Actor.createProxyConfiguration();
 const requestQueue = await RequestQueue.open();
 
 export { allPages, lastPage, startPage };
-export let product: any = { data: {}, variations: {} };
+export let productData: any = { data: {}, variations: {} };
 
 // Add the category requests to the request queue.
 for (const url of categoryUrls) {
@@ -64,17 +64,17 @@ const crawler = new PuppeteerCrawler(
     requestHandler: router,
     preNavigationHooks: [
       async (crawlingContext) => {
-        const { page, request } = crawlingContext;
+        const { page } = crawlingContext;
         page.on("response", async (response) => {
           if (response.url().includes("productClientOnlyProduct")) {
             const rawData = await response.buffer();
             const jsonData = JSON.parse(rawData.toString());
-            product.data = jsonData.data.product;
+            productData.data = jsonData.data.product;
           }
           if (response.url().includes("mediaPriceInventory")) {
             const rawData = await response.buffer();
             const jsonData = JSON.parse(rawData.toString());
-            product.variations = jsonData.data.product;
+            productData.variations = jsonData.data.product;
           }
         });
       },
