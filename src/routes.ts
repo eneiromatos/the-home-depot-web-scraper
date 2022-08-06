@@ -163,7 +163,7 @@ router.addHandler(labels.detail, async ({ request, page, log }) => {
     return codes;
   }
 
-  async function getDescriptionHTML() {
+  async function getDescription() {
     const abstract = productData.data.details.description;
     const bulletPoints = productData.data.details.descriptiveAttributes
       .filter((el) => !el.value.includes("href"))
@@ -181,22 +181,29 @@ router.addHandler(labels.detail, async ({ request, page, log }) => {
     return { abstract, bulletPoints, descriptionHTML };
   }
 
-  async function getMedia() {}
+  async function getImages() {
+    const images = productData.data.media.images.map((el) => {
+      const maxRes = el.sizes.at(-1);
+      const imgURL = el.url.replace("<SIZE>", maxRes);
+      return imgURL;
+    });
+    return images;
+  }
   /**************************************************************************************/
   const url = request.url;
   const title = await getTitle();
   const brand = await getBrand();
   const codes = await getCodes();
-  const descriptionHTML = await getDescriptionHTML();
-  const media = await getImages();
+  const description = await getDescription();
+  const images = await getImages();
 
   await Dataset.pushData({
     url,
     title,
     brand,
     codes,
-    descriptionHTML,
-    media,
+    description,
+    images,
     product,
   });
 });
