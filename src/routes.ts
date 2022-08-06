@@ -3,6 +3,7 @@ import {
   RequestQueue,
   Dataset,
 } from "@crawlee/puppeteer";
+import { product } from "./main.js";
 import { labels } from "./labels.js";
 import { allPages, startPage, lastPage } from "./main.js";
 import { getRequest } from "./requestGenerator.js";
@@ -136,91 +137,66 @@ router.addHandler(labels.listing, async ({ request, page, log }) => {
 
 router.addHandler(labels.detail, async ({ request, page, log }) => {
   log.info("Handling:", { label: request.label, url: request.url });
+  const productData = await product;
 
   async function getTitle() {
-    const selector = "span.product-title h1";
-    await page.waitForSelector(selector, { visible: true });
-    const title = await page.$eval(selector, (el) => el.textContent.trim());
+    const title = productData.data.identifiers.productLabel;
     return title;
   }
 
   async function getBrand() {
-    const selector = "span.product-details__brand--link";
-    try {
-      await page.waitForSelector(selector, { visible: true });
-    } catch (error) {
-      return "";
-    }
-    const brand = await page.$eval(selector, (el) => el.textContent.trim());
+    const brand = productData.data.identifiers.brandName;
     return brand;
   }
 
   async function getCodes() {
-    const codes = page.$$eval(
-      "h2[class*='product-info-bar__detail']",
-      (codes) =>
-        codes.map((code) => {
-          const codeObj: Object = {};
-          const codeStr = code.textContent;
-          const codeName = codeStr.split("#")[0].trim();
-          const codeNum = codeStr.split("#")[1].trim();
-          codeObj[codeName] = codeNum;
-          return codeObj;
-        })
-    );
+    const id = productData.data.identifiers.itemId;
+    const sku = productData.data.identifiers.storeSkuNumber;
+    const modelNumber = productData.data.identifiers.modelNumber;
+    const upc = productData.data.identifiers.upc;
+    const codes = {
+      id: id ? id : null,
+      sku: sku ? sku : null,
+      modelNumber: modelNumber ? modelNumber : null,
+      upc: upc ? upc : null,
+    };
     return codes;
   }
 
-  async function getDescription() {
-    const selector =
-      'div[class="grid desktop-content-wrapper__main-description"]';
-    try {
-      await page.waitForSelector(selector);
-    } catch (error) {
-      return "";
+  async function getDescriptionHTML() {
+    const abstract = productData.data.details.description;
+    const bulletPoints = productData.data.details.descriptiveAttributes
+      .filter((el) => !el.value.includes("href"))
+      .map((el) => el.value);
+    let descriptionHTML = "";
+    descriptionHTML = descriptionHTML.concat(`<p>${abstract}</p>`, "<ul>");
+    for (let index = 0; index < bulletPoints.length; index++) {
+      descriptionHTML = descriptionHTML.concat(
+        `<li>${bulletPoints[index]}</li>`
+      );
+      if (index === bulletPoints.length - 1) {
+        descriptionHTML = descriptionHTML.concat("</ul>");
+      }
     }
-    const description = await page.$eval(selector, (table) =>
-      table.innerHTML.trim()
-    );
-    return description;
+    return { abstract, bulletPoints, descriptionHTML };
   }
 
-  async function getImages() {
-    const mainImageSelector = "div.mediagallery__mainimage";
-    const thumbsSelector = "div.overlay__thumbnails img";
-    try {
-      await page.waitForSelector(mainImageSelector);
-    } catch (error) {
-      return [];
-    }
-    await page.click(mainImageSelector);
-    try {
-      await page.waitForSelector(thumbsSelector);
-    } catch (error) {
-      return [];
-    }
-    const imageRelUrls = await page.$$eval(thumbsSelector, (images) =>
-      images.map((image) => image.getAttribute("src").replace("_145", "_1000"))
-    );
-    const imageUrls = imageRelUrls.map((image) =>
-      new URL(image, BaseURL).toString()
-    );
-    return imageUrls;
-  }
+  async function getMedia() {}
   /**************************************************************************************/
   const url = request.url;
   const title = await getTitle();
   const brand = await getBrand();
   const codes = await getCodes();
-  const description = await getDescription();
-  const images = await getImages();
+  const descriptionHTML = await getDescriptionHTML();
+  const media = await getImages();
 
   await Dataset.pushData({
     url,
     title,
     brand,
     codes,
-    description,
-    images,
+    descriptionHTML,
+    media,
+    product,
   });
 });
