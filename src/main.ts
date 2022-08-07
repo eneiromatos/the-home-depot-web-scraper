@@ -4,6 +4,7 @@ import {
   log,
   RequestQueue,
   Configuration,
+  puppeteerUtils,
 } from "@crawlee/puppeteer";
 import { router } from "./routes.js";
 import { getRequest } from "./requestGenerator.js";
@@ -59,21 +60,32 @@ const crawler = new PuppeteerCrawler(
   {
     proxyConfiguration,
     requestQueue,
-    maxConcurrency: 20,
     maxRequestRetries: 5,
+    minConcurrency: 5,
+    maxConcurrency: 20,
     requestHandler: router,
     preNavigationHooks: [
-      async (crawlingContext) => {
+      async (crawlingContext, gotoOptions) => {
         const { page } = crawlingContext;
+        gotoOptions.waitUntil = "networkidle2";
+        await puppeteerUtils.blockRequests(page, {
+          urlPatterns: [".webp", ".svg", ".png", ".woff2"],
+        });
         page.on("response", async (response) => {
-          if (response.url().includes("productClientOnlyProduct")) {
+          if (
+            response.url().includes("productClientOnlyProduct") &&
+            response.status() === 200
+          ) {
             const rawData = await response.buffer();
-            const jsonData = JSON.parse(rawData.toString());
+            const jsonData = await JSON.parse(rawData.toString());
             productData.data = jsonData.data.product;
           }
-          if (response.url().includes("mediaPriceInventory")) {
+          if (
+            response.url().includes("mediaPriceInventory") &&
+            response.status() === 200
+          ) {
             const rawData = await response.buffer();
-            const jsonData = JSON.parse(rawData.toString());
+            const jsonData = await JSON.parse(rawData.toString());
             productData.variations = jsonData.data.product;
           }
         });

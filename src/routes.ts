@@ -138,17 +138,17 @@ router.addHandler(labels.listing, async ({ request, page, log }) => {
 router.addHandler(labels.detail, async ({ request, page, log }) => {
   log.info("Handling:", { label: request.label, url: request.url });
 
-  function getTitle() {
+  async function getTitle() {
     const title = productData.data.identifiers.productLabel;
     return title;
   }
 
-  function getBrand() {
+  async function getBrand() {
     const brand = productData.data.identifiers.brandName;
     return brand;
   }
 
-  function getCodes() {
+  async function getCodes() {
     const id = productData.data.identifiers.itemId;
     const sku = productData.data.identifiers.storeSkuNumber;
     const modelNumber = productData.data.identifiers.modelNumber;
@@ -162,7 +162,7 @@ router.addHandler(labels.detail, async ({ request, page, log }) => {
     return codes;
   }
 
-  function getDescription() {
+  async function getDescription() {
     const abstract = productData.data.details.description;
     const bulletPoints = productData.data.details.descriptiveAttributes
       .filter((el) => !el.value.includes("href"))
@@ -180,7 +180,7 @@ router.addHandler(labels.detail, async ({ request, page, log }) => {
     return { descriptionHTML, abstract, bulletPoints };
   }
 
-  function getImages() {
+  async function getImages() {
     const images = productData.data.media.images.map((el) => {
       const maxRes = el.sizes.at(-1);
       const imgURL = el.url.replace("<SIZE>", maxRes);
@@ -189,7 +189,7 @@ router.addHandler(labels.detail, async ({ request, page, log }) => {
     return images;
   }
 
-  function getPricing() {
+  async function getPricing() {
     let princig = {
       currencySymbol: "$",
       currentPrice: 0,
@@ -227,13 +227,14 @@ router.addHandler(labels.detail, async ({ request, page, log }) => {
   }
 
   /**************************************************************************************/
+
   const url = request.url;
-  const title = getTitle();
-  const brand = getBrand();
-  const codes = getCodes();
-  const description = getDescription();
-  const images = getImages();
-  const pricing = getPricing();
+  const title = await getTitle();
+  const brand = await getBrand();
+  const codes = await getCodes();
+  const description = await getDescription();
+  const images = await getImages();
+  const pricing = await getPricing();
 
   await Dataset.pushData({
     url,
