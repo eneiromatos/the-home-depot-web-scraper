@@ -3,7 +3,7 @@ import {
   RequestQueue,
   Dataset,
 } from "@crawlee/puppeteer";
-import { productData } from "./main.js";
+import { productData, searhResults } from "./main.js";
 import { labels } from "./labels.js";
 import { allPages, startPage, lastPage } from "./main.js";
 import { getRequest } from "./requestGenerator.js";
@@ -12,50 +12,19 @@ export const router = createPuppeteerRouter();
 
 const BaseURL = "https://www.homedepot.com/";
 
-router.addHandler(labels.listing, async ({ request, page, log }) => {
+router.addHandler(labels.listing, async ({ request, log }) => {
   log.info("Handling:", { label: request.label, url: request.url });
   const requestQueue = await RequestQueue.open();
 
-  async function reziseVieport() {
-    const bodyWidth = 1440;
-    const bodyHeight = 50000;
-    await page.setViewport({ width: bodyWidth, height: bodyHeight });
-    for (let index = 1; index <= 6; index++) {
-      const selector = "section[id*=browse-search-pods-${num}]";
-      await page.keyboard.press("PageDown");
-      await page.keyboard.press("PageDown");
-      try {
-        await page.waitForSelector(selector, { visible: true });
-      } catch (error) {
-        break;
-      }
-    }
-  }
-
   async function getPaginationData() {
-    const numItemsRange = await page.$eval(
-      "div.results-pagination__counts span:nth-of-type(1)",
-      (el) => el.textContent
-    );
-    const totalItems = Number(
-      await page.$eval(
-        "div.results-pagination__counts span:nth-of-type(2)",
-        (el) => el.textContent
-      )
-    );
-    const numItems = Number(numItemsRange?.split("-")[1]);
+    const totalItems = searhResults.searchReport.totalProducts;
+    const numItems = searhResults.searchReport.pageSize;
     return { numItems, totalItems };
   }
 
   async function getItems() {
-    const selector =
-      'div.results-wrapped div[data-lg-name*="Product Pod"] div.product-pod__title a';
-
-    const itemRelUrls = await page.$$eval(selector, (urls) =>
-      urls.map((url) => url.getAttribute("href"))
-    );
-    const itemUrls = itemRelUrls.map((relUrl) =>
-      new URL(relUrl, BaseURL).toString()
+    const itemUrls = searhResults.products.map((el) =>
+      new URL(el.identifiers.canonicalUrl, BaseURL).toString()
     );
     return itemUrls;
   }
@@ -115,7 +84,6 @@ router.addHandler(labels.listing, async ({ request, page, log }) => {
   }
 
   /*************************************************************************/
-  await reziseVieport();
   const isPagination = request.url.includes("Nao=");
   const isSinglePage = startPage === lastPage;
   const isRange = startPage != lastPage;
