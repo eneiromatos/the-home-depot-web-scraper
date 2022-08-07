@@ -62,9 +62,8 @@ const crawler = new PuppeteerCrawler(
     proxyConfiguration,
     requestQueue,
     maxRequestRetries: 5,
-    minConcurrency: 5,
-    maxConcurrency: 20,
-    requestHandler: router,
+    minConcurrency: 1,
+    maxConcurrency: 1,
     preNavigationHooks: [
       async (crawlingContext, gotoOptions) => {
         const { page } = crawlingContext;
@@ -101,6 +100,7 @@ const crawler = new PuppeteerCrawler(
         });
       },
     ],
+    requestHandler: router,
   },
   config
 );
