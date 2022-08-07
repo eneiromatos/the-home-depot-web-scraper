@@ -37,6 +37,7 @@ const requestQueue = await RequestQueue.open();
 
 export { allPages, lastPage, startPage };
 export let productData: any = { data: {}, variations: {} };
+export let searhResults: any = {};
 
 // Add the category requests to the request queue.
 for (const url of categoryUrls) {
@@ -86,7 +87,16 @@ const crawler = new PuppeteerCrawler(
           ) {
             const rawData = await response.buffer();
             const jsonData = await JSON.parse(rawData.toString());
-            productData.variations = jsonData.data.product;
+            productData.variations =
+              jsonData.data.mediaPriceInventory.productDetailsList;
+          }
+          if (
+            response.url().includes("searchModel") &&
+            response.status() === 200
+          ) {
+            const rawData = await response.buffer();
+            const jsonData = await JSON.parse(rawData.toString());
+            searhResults = jsonData.data.searchModel;
           }
         });
       },
