@@ -171,7 +171,7 @@ router.addHandler(labels.detail, async ({ request, page, log }) => {
 
     if (
       productData.data.pricing.promotion &&
-      productData.data.pricing.value != productData.data.pricing.original
+      productData.data.pricing.value < productData.data.pricing.original
     ) {
       princig.promoData.originalPrice = productData.data.pricing.original;
       princig.promoData.dates.start =
@@ -211,6 +211,21 @@ router.addHandler(labels.detail, async ({ request, page, log }) => {
     return specs;
   }
 
+  async function getVariations() {
+    let variations = [];
+    if (productData.variations) {
+      const attributes = productData.variations.attributes;
+      for (const attr of attributes) {
+        let itemOption = new Object();
+        itemOption[attr.attributeName] = attr.attributeValues.map(
+          (el) => el.value
+        );
+        variations.push(itemOption);
+      }
+    }
+    return variations;
+  }
+
   /**************************************************************************************/
 
   const url = request.url;
@@ -221,15 +236,17 @@ router.addHandler(labels.detail, async ({ request, page, log }) => {
   const images = await getImages();
   const pricing = await getPricing();
   const specifications = await getSpecifications();
+  const variations = await getVariations();
 
   await Dataset.pushData({
     url,
     title,
     brand,
     codes,
-    description,
-    images,
     pricing,
+    description,
+    variations,
+    images,
     specifications,
   });
 });
