@@ -3,7 +3,7 @@ import {
   PuppeteerCrawler,
   log,
   RequestQueue,
-  Configuration,
+  //Configuration,
   puppeteerUtils,
 } from "@crawlee/puppeteer";
 import { router } from "./routes.js";
@@ -55,7 +55,7 @@ for (let keyword of keywords) {
   await requestQueue.addRequest(getRequest(url, minPrice, maxPrice));
 }
 
-const config = new Configuration({ headless: true });
+//const config = new Configuration({ headless: true });
 
 const crawler = new PuppeteerCrawler(
   {
@@ -102,7 +102,7 @@ const crawler = new PuppeteerCrawler(
     ],
     requestHandler: router,
   },
-  config
+  //config
 );
 
 log.info("Starting the crawl.");
