@@ -194,6 +194,20 @@ router.addHandler(labels.detail, async ({ request, page, log }) => {
     return princig;
   }
 
+  async function getSpecifications() {
+    const specsGroups = productData.data.specificationGroup;
+    let specs = new Object();
+    for (const group of specsGroups) {
+      specs[group.specTitle] = group.specifications.map((specs) => {
+        let specGr = new Object();
+        specGr["specName"] = specs.specName;
+        specGr["specValue"] = specs.specValue;
+        return specGr;
+      });
+    }
+    return specs;
+  }
+
   /**************************************************************************************/
 
   const url = request.url;
@@ -203,6 +217,7 @@ router.addHandler(labels.detail, async ({ request, page, log }) => {
   const description = await getDescription();
   const images = await getImages();
   const pricing = await getPricing();
+  const specifications = await getSpecifications();
 
   await Dataset.pushData({
     url,
@@ -212,5 +227,6 @@ router.addHandler(labels.detail, async ({ request, page, log }) => {
     description,
     images,
     pricing,
+    specifications,
   });
 });
