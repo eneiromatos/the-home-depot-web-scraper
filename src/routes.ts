@@ -169,8 +169,11 @@ router.addHandler(labels.detail, async ({ request, page, log }) => {
     princig.currentPrice = productData.data.pricing.value;
     princig.currentPriceUnit = productData.data.pricing.unitOfMeasure;
 
-    if (productData.data.pricing.promotion) {
-      princig.promoData.originalPrice = productData.data.pricing.value;
+    if (
+      productData.data.pricing.promotion &&
+      productData.data.pricing.value != productData.data.pricing.original
+    ) {
+      princig.promoData.originalPrice = productData.data.pricing.original;
       princig.promoData.dates.start =
         productData.data.pricing.promotion.dates.start;
       princig.promoData.dates.end =
