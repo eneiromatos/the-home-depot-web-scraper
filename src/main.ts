@@ -32,7 +32,7 @@ const {
   maxPrice = 0,
 } = (await Actor.getInput<InputSchema>()) ?? {};
 
-const proxyConfiguration = await Actor.createProxyConfiguration();
+//const proxyConfiguration = await Actor.createProxyConfiguration();
 const requestQueue = await RequestQueue.open();
 
 export { allPages, lastPage, startPage };
@@ -59,7 +59,7 @@ const config = new Configuration({ headless: true });
 
 const crawler = new PuppeteerCrawler(
   {
-    proxyConfiguration,
+    //proxyConfiguration,
     requestQueue,
     maxRequestRetries: 5,
     minConcurrency: 1,
