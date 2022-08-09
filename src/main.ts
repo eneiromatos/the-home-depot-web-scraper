@@ -32,12 +32,12 @@ const {
   maxPrice = 0,
 } = (await Actor.getInput<InputSchema>()) ?? {};
 
-//const proxyConfiguration = await Actor.createProxyConfiguration();
-const requestQueue = await RequestQueue.open();
-
 export { allPages, lastPage, startPage };
-export let productData: any = { data: {}, variations: {} };
-export let searhResults: any = {};
+
+const proxyConfiguration = await Actor.createProxyConfiguration({
+  countryCode: "US",
+});
+const requestQueue = await RequestQueue.open();
 
 // Add the category requests to the request queue.
 for (const url of categoryUrls) {
@@ -59,49 +59,52 @@ for (let keyword of keywords) {
 
 const crawler = new PuppeteerCrawler(
   {
-    //proxyConfiguration,
+    proxyConfiguration,
     requestQueue,
     maxRequestRetries: 5,
-    minConcurrency: 1,
-    maxConcurrency: 1,
+    minConcurrency: 5,
+    maxConcurrency: 10,
     preNavigationHooks: [
-      async (crawlingContext, gotoOptions) => {
-        const { page } = crawlingContext;
+      async ({ page, request }, gotoOptions) => {
         gotoOptions.waitUntil = "networkidle2";
         await puppeteerUtils.blockRequests(page, {
           urlPatterns: [".webp", ".svg", ".png", ".woff2"],
         });
         page.on("response", async (response) => {
+          const responseFromURL = response.request().headers().referer;
+          const requesterURL = request.url;
           if (
             response.url().includes("productClientOnlyProduct") &&
-            response.status() === 200
+            response.status() === 200 &&
+            responseFromURL === requesterURL
           ) {
             const rawData = await response.buffer();
             const jsonData = await JSON.parse(rawData.toString());
-            productData.data = jsonData.data.product;
+            request.userData.data = jsonData.data.product;
           }
           if (
-            response.url().includes("mediaPriceInventory") &&
-            response.status() === 200
+            response.url().includes("opname=metadata") &&
+            response.status() === 200 &&
+            responseFromURL === requesterURL
           ) {
             const rawData = await response.buffer();
             const jsonData = await JSON.parse(rawData.toString());
-            productData.variations =
-              jsonData.data.mediaPriceInventory.productDetailsList;
+            request.userData.variations = jsonData.data.metadata;
           }
           if (
             response.url().includes("searchModel") &&
-            response.status() === 200
+            response.status() === 200 &&
+            responseFromURL === requesterURL
           ) {
             const rawData = await response.buffer();
             const jsonData = await JSON.parse(rawData.toString());
-            searhResults = jsonData.data.searchModel;
+            request.userData.searhResults = jsonData.data.searchModel;
           }
         });
       },
     ],
     requestHandler: router,
-  },
+  }
   //config
 );
 

@@ -3,7 +3,6 @@ import {
   RequestQueue,
   Dataset,
 } from "@crawlee/puppeteer";
-import { productData, searhResults } from "./main.js";
 import { labels } from "./labels.js";
 import { allPages, startPage, lastPage } from "./main.js";
 import { getRequest } from "./requestGenerator.js";
@@ -15,6 +14,8 @@ const BaseURL = "https://www.homedepot.com/";
 router.addHandler(labels.listing, async ({ request, log }) => {
   log.info("Handling:", { label: request.label, url: request.url });
   const requestQueue = await RequestQueue.open();
+
+  const searhResults = request.userData.searhResults;
 
   async function getPaginationData() {
     const totalItems = searhResults.searchReport.totalProducts;
@@ -106,6 +107,11 @@ router.addHandler(labels.listing, async ({ request, log }) => {
 router.addHandler(labels.detail, async ({ request, page, log }) => {
   log.info("Handling:", { label: request.label, url: request.url });
 
+  const productData = {
+    data: request.userData.data,
+    variations: request.userData.variations,
+  };
+
   async function getTitle() {
     const title = productData.data.identifiers.productLabel;
     return title;
@@ -157,6 +163,33 @@ router.addHandler(labels.detail, async ({ request, page, log }) => {
     return images;
   }
 
+  async function getAvailability() {
+    let isAvailable = productData.data.pricing.value ? true : false;
+    let sellsInStore = false
+    let sellsOnline = false
+
+    let availableAt = productData.data.availabilityType.type
+
+    if(availableAt === "Shared"){
+      sellsInStore = true
+      sellsOnline = true
+    } else if(availableAt === "Online"){
+      sellsInStore = false
+      sellsOnline = true
+    } else if(availableAt === "Store Only"){
+      sellsInStore = true
+      sellsOnline = false
+    }
+
+    const availabilityOptions = {
+      isAvailable,
+      sellsInStore,
+      sellsOnline
+    }
+
+    return availabilityOptions;
+  }
+
   async function getPricing() {
     let princig = {
       currencySymbol: "$",
@@ -165,6 +198,12 @@ router.addHandler(labels.detail, async ({ request, page, log }) => {
       promoData: { originalPrice: 0, dates: { start: "", end: "" } },
       alternatePriceData: { alternatePrice: 0, alternatePriceUnit: "" },
     };
+
+    const availability = await getAvailability();
+
+    if (!availability.isAvailable) {
+      return princig;
+    }
 
     princig.currentPrice = productData.data.pricing.value;
     princig.currentPriceUnit = productData.data.pricing.unitOfMeasure;
@@ -237,12 +276,14 @@ router.addHandler(labels.detail, async ({ request, page, log }) => {
   const pricing = await getPricing();
   const specifications = await getSpecifications();
   const variations = await getVariations();
+  const availabilityInfo = await getAvailability();
 
   await Dataset.pushData({
     url,
     title,
     brand,
     codes,
+    availabilityInfo,
     pricing,
     description,
     variations,
