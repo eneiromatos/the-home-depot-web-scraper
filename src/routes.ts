@@ -165,27 +165,27 @@ router.addHandler(labels.detail, async ({ request, page, log }) => {
 
   async function getAvailability() {
     let isAvailable = productData.data.pricing.value ? true : false;
-    let sellsInStore = false
-    let sellsOnline = false
+    let sellsInStore = false;
+    let sellsOnline = false;
 
-    let availableAt = productData.data.availabilityType.type
+    let availableAt = productData.data.availabilityType.type;
 
-    if(availableAt === "Shared"){
-      sellsInStore = true
-      sellsOnline = true
-    } else if(availableAt === "Online"){
-      sellsInStore = false
-      sellsOnline = true
-    } else if(availableAt === "Store Only"){
-      sellsInStore = true
-      sellsOnline = false
+    if (availableAt === "Shared") {
+      sellsInStore = true;
+      sellsOnline = true;
+    } else if (availableAt === "Online") {
+      sellsInStore = false;
+      sellsOnline = true;
+    } else if (availableAt === "Store Only") {
+      sellsInStore = true;
+      sellsOnline = false;
     }
 
     const availabilityOptions = {
       isAvailable,
       sellsInStore,
-      sellsOnline
-    }
+      sellsOnline,
+    };
 
     return availabilityOptions;
   }
@@ -194,9 +194,9 @@ router.addHandler(labels.detail, async ({ request, page, log }) => {
     let princig = {
       currencySymbol: "$",
       currentPrice: 0,
-      currentPriceUnit: "",
-      promoData: { originalPrice: 0, dates: { start: "", end: "" } },
-      alternatePriceData: { alternatePrice: 0, alternatePriceUnit: "" },
+      currentPriceUnit: null,
+      promoData: { originalPrice: 0, dates: { start: null, end: null } },
+      alternatePriceData: { alternatePrice: 0, alternatePriceUnit: null },
     };
 
     const availability = await getAvailability();
@@ -213,10 +213,12 @@ router.addHandler(labels.detail, async ({ request, page, log }) => {
       productData.data.pricing.value < productData.data.pricing.original
     ) {
       princig.promoData.originalPrice = productData.data.pricing.original;
-      princig.promoData.dates.start =
-        productData.data.pricing.promotion.dates.start;
-      princig.promoData.dates.end =
-        productData.data.pricing.promotion.dates.end;
+      if (productData.data.pricing.promotion.dates) {
+        princig.promoData.dates.start =
+          productData.data.pricing.promotion.dates.start;
+        princig.promoData.dates.end =
+          productData.data.pricing.promotion.dates.end;
+      }
     } else {
       princig.promoData.originalPrice = null;
       princig.promoData.dates.start = null;
