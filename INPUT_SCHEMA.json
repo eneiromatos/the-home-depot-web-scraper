@@ -1,6 +1,6 @@
 {
   "title": "Homedepot Scraper",
-  "description": "Homedepot Scraper is a web scraper designed to extract information from homedepot.com products such as price, code, variations, availability, images and much more. You can use it with keywords, categories urls and by targeting specific products urls.",
+  "description": "Homedepot Scraper is a web scraper designed to extract information from homedepot.com products, such as price, code, variations, availability, images and much more. You can use it with keywords, categories urls and by targeting specific products urls and segment all by price range.",
   "type": "object",
   "schemaVersion": 1,
   "properties": {
