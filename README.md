@@ -23,7 +23,7 @@ First result page from which to start extracting products, works with categories
 ### Last Page
 Last result page from which to end extracting products, works with categories and keywords.
 ### Scrape all pages
-When set to ON the scraper crawls all the result pages, works with categories and keywords.
+When set to ON the scraper will crawl all the result pages, works with categories and keywords.
 
 ## Segmentation Options
 Options intended for products segmentation.

@@ -1,15 +1,15 @@
 {
-  "title": "Homedepot Scraper",
-  "description": "Homedepot Scraper is a web scraper designed to extract information from homedepot.com products, such as price, code, variations, availability, images and much more. You can use it with keywords, categories urls and by targeting specific products urls and segment all by price range.",
+  "title": "Home Depot Web Scraper",
+  "description": "Home Depot Web Scraper is a data extraction tool engineered to extract information from homedepot.com products, such as prices, codes, variations, availability, images and much more. You can target keywords, category URLs, product URLs and segment your dataset by price range.",
   "type": "object",
   "schemaVersion": 1,
   "properties": {
     "categoryUrls": {
       "title": "Category URLs",
       "type": "array",
-      "description": "One or more category url(s) to extract products from.",
+      "description": "One or more category URLs to extract products from.",
       "sectionCaption": "Input Options",
-      "sectionDescription": "Sets the input options for scraping products.",
+      "sectionDescription": "Input options for scraping products. Please input at least one.",
       "editor": "stringList"
     },
     "keywords": {
@@ -21,7 +21,7 @@
     "productUrls": {
       "title": "Product URLs",
       "type": "array",
-      "description": "One or more product urls to extract information from.",
+      "description": "One or more product URLs to extract data from.",
       "editor": "stringList"
     },
     "startPage": {
@@ -29,8 +29,8 @@
       "type": "integer",
       "description": "First result page from which to start extracting products, works with categories and keywords.",
       "default": 1,
-      "sectionCaption": "Pagination Options ",
-      "sectionDescription": "Options to control the pagination of the results.",
+      "sectionCaption": "Pagination Options",
+      "sectionDescription": "Options to control results pagination.",
       "editor": "number",
       "minimum": 1,
       "prefill": 1
@@ -47,24 +47,24 @@
     "allPages": {
       "title": "Scrape all pages",
       "type": "boolean",
-      "description": "Set to on to scrape all the result pages",
+      "description": "Set to ON to crawl all the result pages.",
       "editor": "checkbox"
     },
     "minPrice": {
-      "title": "Minimun Price",
+      "title": "Minimum Price",
       "type": "integer",
-      "description": "Minimun price of the scraped products.",
+      "description": "Set the minimum price of the scraped products.",
       "sectionCaption": "Segmentation",
-      "sectionDescription": "Set options for segmentation of the products.",
+      "sectionDescription": "Options intended for products segmentation.",
       "default": 0,
       "editor": "number",
       "minimum": 0,
       "prefill": 0
     },
     "maxPrice": {
-      "title": "Maximun Price",
+      "title": "Maximum Price",
       "type": "integer",
-      "description": "Maximun price of the scraped products.",
+      "description": "Set the maximum price of the scraped products.",
       "default": 0,
       "editor": "number",
       "minimum": 0,
