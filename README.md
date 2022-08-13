@@ -29,7 +29,7 @@ When set to ON the scraper will crawl all the result pages, works with categorie
 Options intended for products segmentation.
 ### Minimum Price
 Set the minimum price of the scraped products.
-### Minimum Price
+### Maximum Price
 Set the maximum price of the scraped products.
 
 ## Note
