@@ -1,32 +1,36 @@
-# Crawlee + PuppeteerCrawler + TypeScript project
+# Home Depot Web Scraper
 
-This template is a production ready boilerplate for developing with `PuppeteerCrawler`. Use this to bootstrap your projects using the most up-to-date code.
+Home Depot Web Scraper automates **data extraction from Home Depot**, the largest home improvement retailer in the United States. Scrape products based on search query, category urls or product urls and extract information such as:
+- Title, brand, pricing and availability.
+- Product description and variations.
+- Product images and specifications.
 
-If you're looking for examples or want to learn more visit:
+Export accumulated data into HTML, JSON, CSV, Excel, or XML formats. Don't waste your time looking for other tools, this is the ultimate Home Hepot Web Scraper.
 
-- [Documentation](https://sdk.apify.com/docs/api/puppeteer-crawler)
-- [Examples](https://sdk.apify.com/docs/examples/puppeteer-crawler)
+## Input
+These are the inputs used by the actor, you can use any of them or all of them:
+### Category URLs
+The category URLs where you want to search for products.
+### Keywords
+The keywords you want to use to search for products.
+### Product URLs
+The products URLs where you want to search for products.
 
-## Documentation reference
+## Pagination Options
+These are the options to control the actor's pagination:
+### Start Page
+First result page from which to start extracting products, works with categories and keywords.
+### Last Page
+Last result page from which to end extracting products, works with categories and keywords.
+### Scrape all pages
+When set to ON the scraper crawls all the result pages, works with categories and keywords.
 
-- [Apify SDK](https://sdk.apify.com/)
-- [Apify Actor documentation](https://docs.apify.com/actor)
-- [Apify CLI](https://docs.apify.com/cli)
+## Segmentation Options
+Options intended for products segmentation.
+### Minimum Price
+Set the minimum price of the scraped products.
+### Minimum Price
+Set the maximum price of the scraped products.
 
-## Writing a README
-
-See our tutorial on [writing READMEs for your actors](https://help.apify.com/en/articles/2912548-how-to-write-great-readme-for-your-actors) if you need more inspiration.
-
-### Table of contents
-
-If your README requires a table of contents, use the template below and make sure to keep the `<!-- toc start -->` and `<!-- toc end -->` markers.
-
-<!-- toc start -->
-- Introduction
-- Use Cases
-    - Case 1
-    - Case 2
-- Input
-- Output
-- Miscellaneous
- <!-- toc end -->
+## Note
+Please report any error or let me know your suggestions to improve this scraper.
